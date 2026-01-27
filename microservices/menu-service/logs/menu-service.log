@@ -1,0 +1,18 @@
+2026-01-28 00:07:02 [http-nio-8083-exec-10] DEBUG c.f.menu.controller.MenuController - Fetching menu items for restaurant: 1
+2026-01-28 00:07:02 [http-nio-8083-exec-10] DEBUG c.f.menu.service.MenuItemService - Fetching available menu items for restaurant: 1
+2026-01-28 00:07:59 [http-nio-8083-exec-1] DEBUG c.f.menu.controller.MenuController - Fetching menu items for restaurant: 1
+2026-01-28 00:07:59 [http-nio-8083-exec-1] DEBUG c.f.menu.service.MenuItemService - Fetching available menu items for restaurant: 1
+2026-01-28 00:08:02 [http-nio-8083-exec-2] DEBUG c.f.menu.controller.MenuController - Fetching menu items for restaurant: 1
+2026-01-28 00:08:02 [http-nio-8083-exec-2] DEBUG c.f.menu.service.MenuItemService - Fetching available menu items for restaurant: 1
+2026-01-28 00:10:46 [http-nio-8083-exec-4] DEBUG c.f.menu.controller.MenuController - Fetching menu items for restaurant: 2
+2026-01-28 00:10:46 [http-nio-8083-exec-4] DEBUG c.f.menu.service.MenuItemService - Fetching available menu items for restaurant: 2
+2026-01-28 00:12:03 [http-nio-8083-exec-6] DEBUG c.f.menu.controller.MenuController - Fetching menu items for restaurant: 1
+2026-01-28 00:12:03 [http-nio-8083-exec-6] DEBUG c.f.menu.service.MenuItemService - Fetching available menu items for restaurant: 1
+2026-01-28 00:18:05 [http-nio-8083-exec-8] DEBUG c.f.menu.controller.MenuController - Fetching menu items for restaurant: 1
+2026-01-28 00:18:05 [http-nio-8083-exec-8] DEBUG c.f.menu.service.MenuItemService - Fetching available menu items for restaurant: 1
+2026-01-28 00:24:14 [http-nio-8083-exec-10] DEBUG c.f.menu.controller.MenuController - Fetching menu items for restaurant: 1
+2026-01-28 00:24:14 [http-nio-8083-exec-10] DEBUG c.f.menu.service.MenuItemService - Fetching available menu items for restaurant: 1
+2026-01-28 00:25:23 [http-nio-8083-exec-2] DEBUG c.f.menu.controller.MenuController - Fetching menu items for restaurant: 1
+2026-01-28 00:25:23 [http-nio-8083-exec-2] DEBUG c.f.menu.service.MenuItemService - Fetching available menu items for restaurant: 1
+2026-01-28 00:25:28 [http-nio-8083-exec-3] DEBUG c.f.menu.controller.MenuController - Fetching menu items for restaurant: 1
+2026-01-28 00:25:28 [http-nio-8083-exec-3] DEBUG c.f.menu.service.MenuItemService - Fetching available menu items for restaurant: 1

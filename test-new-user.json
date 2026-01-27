@@ -1,0 +1,7 @@
+{
+  "name": "Debug User",
+  "email": "debug@test.com",
+  "phone": "1234567890",
+  "password": "test123",
+  "role": "CUSTOMER"
+}

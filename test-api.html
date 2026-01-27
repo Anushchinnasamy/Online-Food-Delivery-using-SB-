@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { padding: 10px 15px; margin: 5px; }
+        .result { margin-top: 10px; padding: 10px; background: #f5f5f5; white-space: pre-wrap; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <h1>Food Delivery API Test</h1>
+    
+    <div class="test-section">
+        <h3>1. Test Services Health</h3>
+        <button onclick="testHealth('auth', 8081)">Auth Service Health</button>
+        <button onclick="testHealth('restaurant', 8082)">Restaurant Service Health</button>
+        <button onclick="testHealth('gateway', 8080)">API Gateway Health</button>
+        <div id="health-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Test Restaurant List (Direct)</h3>
+        <button onclick="testRestaurants()">Get Restaurants</button>
+        <div id="restaurants-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Test Authentication</h3>
+        <button onclick="testLogin()">Test Login</button>
+        <button onclick="testRegister()">Test Register</button>
+        <div id="auth-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Test API Gateway Routing</h3>
+        <button onclick="testGatewayRouting()">Test Gateway</button>
+        <div id="gateway-result" class="result"></div>
+    </div>
+
+    <script>
+        async function testHealth(service, port) {
+            const resultDiv = document.getElementById('health-result');
+            try {
+                const response = await fetch(`http://localhost:${port}/actuator/health`);
+                const data = await response.json();
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `${service} Health: ${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `${service} Health Error: ${error.message}`;
+            }
+        }
+
+        async function testRestaurants() {
+            const resultDiv = document.getElementById('restaurants-result');
+            try {
+                const response = await fetch('http://localhost:8082/restaurants');
+                const data = await response.json();
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `Restaurants: ${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Restaurants Error: ${error.message}`;
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('auth-result');
+            try {
+                const response = await fetch('http://localhost:8081/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@fooddelivery.com',
+                        password: 'password123'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `Login Success: ${JSON.stringify(data, null, 2)}`;
+                } else {
+                    const error = await response.text();
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `Login Error (${response.status}): ${error}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Login Error: ${error.message}`;
+            }
+        }
+
+        async function testRegister() {
+            const resultDiv = document.getElementById('auth-result');
+            try {
+                const response = await fetch('http://localhost:8081/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: 'Test User',
+                        email: 'testuser' + Date.now() + '@example.com',
+                        phone: '987654' + Math.floor(Math.random() * 10000),
+                        password: 'password123',
+                        role: 'CUSTOMER'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `Register Success: ${JSON.stringify(data, null, 2)}`;
+                } else {
+                    const error = await response.text();
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `Register Error (${response.status}): ${error}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Register Error: ${error.message}`;
+            }
+        }
+
+        async function testGatewayRouting() {
+            const resultDiv = document.getElementById('gateway-result');
+            try {
+                // Test auth endpoint through gateway
+                const response = await fetch('http://localhost:8080/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@fooddelivery.com',
+                        password: 'password123'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `Gateway Auth Success: ${JSON.stringify(data, null, 2)}`;
+                } else {
+                    const error = await response.text();
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `Gateway Auth Error (${response.status}): ${error}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Gateway Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

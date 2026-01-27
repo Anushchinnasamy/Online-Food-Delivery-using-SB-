@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Debug</title>
+</head>
+<body>
+    <h1>Simple Debug Test</h1>
+    <button id="testBtn">Test Login and Load Restaurants</button>
+    <div id="result"></div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/restaurants.js"></script>
+    <script>
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...<br>';
+            
+            try {
+                // Step 1: Login
+                console.log('Step 1: Logging in...');
+                resultDiv.innerHTML += 'Step 1: Logging in...<br>';
+                
+                const loginResult = await authManager.login('john.demo@fooddelivery.com', 'password123');
+                console.log('Login result:', loginResult);
+                resultDiv.innerHTML += `Login successful: ${loginResult.user.email}<br>`;
+                
+                // Step 2: Wait a moment
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Step 3: Check auth state
+                console.log('Step 3: Checking auth state...');
+                resultDiv.innerHTML += 'Step 3: Checking auth state...<br>';
+                
+                const isAuth = authManager.isAuthenticated();
+                const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+                console.log('Authenticated:', isAuth);
+                console.log('Token exists:', !!token);
+                resultDiv.innerHTML += `Authenticated: ${isAuth}<br>`;
+                resultDiv.innerHTML += `Token exists: ${!!token}<br>`;
+                
+                // Step 4: Load restaurants
+                console.log('Step 4: Loading restaurants...');
+                resultDiv.innerHTML += 'Step 4: Loading restaurants...<br>';
+                
+                await restaurantManager.loadRestaurants();
+                console.log('Restaurants loaded:', restaurantManager.restaurants.length);
+                resultDiv.innerHTML += `Restaurants loaded: ${restaurantManager.restaurants.length}<br>`;
+                
+                resultDiv.innerHTML += '<strong>SUCCESS!</strong>';
+                
+            } catch (error) {
+                console.error('Test failed:', error);
+                resultDiv.innerHTML += `<strong>ERROR: ${error.message}</strong>`;
+            }
+        });
+    </script>
+</body>
+</html>

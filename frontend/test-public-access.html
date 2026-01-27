@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Public Access</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ff6b35',
+                        secondary: '#2d3748',
+                        accent: '#38b2ac'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-primary">🍕 FoodDelivery - Public Access Test</h1>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- Cart Icon -->
+                    <div class="relative">
+                        <button id="cartBtn" class="text-gray-700 hover:text-primary p-2 rounded-full relative">
+                            <i class="fas fa-shopping-cart text-xl"></i>
+                            <span id="cartCount" class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                        </button>
+                    </div>
+
+                    <!-- User Menu -->
+                    <div id="userMenu" class="hidden">
+                        <div class="relative">
+                            <button id="userMenuBtn" class="flex items-center text-gray-700 hover:text-primary">
+                                <i class="fas fa-user-circle text-xl mr-2"></i>
+                                <span id="userName">User</span>
+                                <i class="fas fa-chevron-down ml-1"></i>
+                            </button>
+                            <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                <button id="logoutBtn" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Auth Buttons -->
+                    <div id="authButtons">
+                        <button id="loginBtn" class="bg-primary text-white px-4 py-2 rounded text-sm font-medium hover:bg-orange-600">Login</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Test Status -->
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <h2 class="text-lg font-semibold mb-4">Public Access Test Status</h2>
+            <div id="testStatus" class="space-y-2 text-sm"></div>
+            <div class="mt-4 space-x-2">
+                <button id="testLoginBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Test Login</button>
+                <button id="testAddToCartBtn" class="bg-green-500 text-white px-4 py-2 rounded">Test Add to Cart</button>
+                <button id="refreshStatusBtn" class="bg-gray-500 text-white px-4 py-2 rounded">Refresh Status</button>
+            </div>
+        </div>
+
+        <!-- Restaurants Section -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">Restaurants (Public Access)</h2>
+            
+            <!-- Filters -->
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <button class="filter-btn active bg-primary text-white px-4 py-2 rounded-full" data-filter="all">All</button>
+                <button class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full border hover:bg-gray-50" data-filter="Indian">Indian</button>
+                <button class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full border hover:bg-gray-50" data-filter="Italian">Italian</button>
+                <button class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full border hover:bg-gray-50" data-filter="Fast Food">Fast Food</button>
+            </div>
+
+            <!-- Restaurants Grid -->
+            <div id="restaurantsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Restaurants will be loaded here -->
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="hidden text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p class="mt-2 text-gray-600">Loading restaurants...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div id="cartSidebar" class="fixed right-0 top-0 h-full w-96 bg-white shadow-lg transform translate-x-full transition-transform duration-300 z-50">
+        <div class="p-6 border-b">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-semibold">Your Cart</h3>
+                <button id="closeCart" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="cartItems" class="flex-1 overflow-y-auto p-6">
+            <!-- Cart items will be displayed here -->
+        </div>
+        
+        <div class="border-t p-6">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-lg font-semibold">Total:</span>
+                <span id="cartTotal" class="text-lg font-bold text-primary">₹0</span>
+            </div>
+            <button id="checkoutBtn" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-orange-600 transition duration-300 disabled:opacity-50" disabled>
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+
+    <!-- Cart Overlay -->
+    <div id="cartOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/restaurants.js"></script>
+    <script>
+        function updateTestStatus() {
+            const statusDiv = document.getElementById('testStatus');
+            const isAuth = authManager.isAuthenticated();
+            const user = authManager.getCurrentUser();
+            const restaurantCount = restaurantManager.restaurants.length;
+            const cartCount = cartManager.getItemCount();
+            
+            statusDiv.innerHTML = `
+                <p><strong>🔐 User Authenticated:</strong> <span class="${isAuth ? 'text-green-600' : 'text-red-600'}">${isAuth ? 'Yes' : 'No'}</span></p>
+                <p><strong>👤 Current User:</strong> ${user ? `${user.email} (${user.role})` : 'None'}</p>
+                <p><strong>🏪 Restaurants Loaded:</strong> <span class="${restaurantCount > 0 ? 'text-green-600' : 'text-red-600'}">${restaurantCount} (Public Access)</span></p>
+                <p><strong>🛒 Cart Items:</strong> <span class="${cartCount > 0 ? 'text-green-600' : 'text-gray-600'}">${cartCount}</span></p>
+                <p><strong>✅ Expected Behavior:</strong> Restaurants visible without login, cart requires login</p>
+            `;
+        }
+        
+        // Test login
+        document.getElementById('testLoginBtn').addEventListener('click', async () => {
+            try {
+                await authManager.login('john.demo@fooddelivery.com', 'password123');
+                updateTestStatus();
+                Utils.showToast('Login successful!', 'success');
+            } catch (error) {
+                Utils.showToast('Login failed: ' + error.message, 'error');
+            }
+        });
+        
+        // Test add to cart (should require login)
+        document.getElementById('testAddToCartBtn').addEventListener('click', () => {
+            // Create a mock menu item
+            const mockMenuItem = {
+                id: 1,
+                name: 'Test Pizza',
+                description: 'Delicious test pizza',
+                price: 299,
+                restaurantId: 1,
+                restaurantName: 'Test Restaurant',
+                deliveryFee: 30
+            };
+            
+            const result = cartManager.addItem(mockMenuItem, 1);
+            if (result) {
+                updateTestStatus();
+            }
+        });
+        
+        // Refresh status
+        document.getElementById('refreshStatusBtn').addEventListener('click', () => {
+            updateTestStatus();
+        });
+        
+        // Listen for auth events
+        document.addEventListener('userLoggedIn', () => {
+            updateTestStatus();
+        });
+        
+        document.addEventListener('userLoggedOut', () => {
+            updateTestStatus();
+        });
+        
+        // Initialize
+        updateTestStatus();
+        
+        // Update status every 3 seconds
+        setInterval(updateTestStatus, 3000);
+    </script>
+</body>
+</html>

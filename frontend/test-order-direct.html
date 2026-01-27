@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Order API Direct</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">Test Order API Direct</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Step 1: Login</h2>
+            <button id="loginBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Login as John Demo
+            </button>
+            <div id="loginResult" class="mt-2 text-sm"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-lg font-semibold mb-4">Step 2: Place Order</h2>
+            <button id="orderBtn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" disabled>
+                Place Test Order
+            </button>
+            <div id="orderResult" class="mt-2 text-sm"></div>
+        </div>
+    </div>
+
+    <script>
+        let accessToken = null;
+
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const loginBtn = document.getElementById('loginBtn');
+            const loginResult = document.getElementById('loginResult');
+            
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'john.demo@fooddelivery.com',
+                        password: 'password123'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    accessToken = data.access_token;
+                    loginResult.innerHTML = '<span class="text-green-600">✓ Login successful</span>';
+                    document.getElementById('orderBtn').disabled = false;
+                } else {
+                    const errorData = await response.json();
+                    loginResult.innerHTML = `<span class="text-red-600">✗ Login failed: ${errorData.message}</span>`;
+                }
+            } catch (error) {
+                loginResult.innerHTML = `<span class="text-red-600">✗ Error: ${error.message}</span>`;
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login as John Demo';
+            }
+        });
+
+        document.getElementById('orderBtn').addEventListener('click', async () => {
+            const orderBtn = document.getElementById('orderBtn');
+            const orderResult = document.getElementById('orderResult');
+            
+            if (!accessToken) {
+                orderResult.innerHTML = '<span class="text-red-600">✗ Please login first</span>';
+                return;
+            }
+            
+            orderBtn.disabled = true;
+            orderBtn.textContent = 'Placing order...';
+            
+            const orderData = {
+                restaurantId: 1,
+                items: [
+                    {
+                        menuItemId: 1,
+                        quantity: 1,
+                        specialInstructions: "Test order from direct API test"
+                    }
+                ],
+                specialInstructions: "Test order - Address: 123 Test Street, Phone: 9876543210"
+            };
+            
+            try {
+                console.log('Placing order with data:', orderData);
+                console.log('Using token:', accessToken);
+                
+                const response = await fetch('http://localhost:8080/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+                
+                if (response.ok) {
+                    const orderResponse = await response.json();
+                    console.log('Order response:', orderResponse);
+                    orderResult.innerHTML = `<span class="text-green-600">✓ Order placed successfully! Order ID: ${orderResponse.id || 'N/A'}</span>`;
+                } else {
+                    const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+                    console.error('Order failed:', errorData);
+                    orderResult.innerHTML = `<span class="text-red-600">✗ Order failed: ${errorData.message || response.status}</span>`;
+                }
+            } catch (error) {
+                console.error('Order error:', error);
+                orderResult.innerHTML = `<span class="text-red-600">✗ Error: ${error.message}</span>`;
+            } finally {
+                orderBtn.disabled = false;
+                orderBtn.textContent = 'Place Test Order';
+            }
+        });
+    </script>
+</body>
+</html>

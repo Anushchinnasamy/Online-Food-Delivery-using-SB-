@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Menu - Food Delivery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#f97316',
+                        secondary: '#fb923c'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center">
+                        <i class="fas fa-utensils text-primary text-2xl mr-2"></i>
+                        <span class="text-xl font-bold text-gray-900">FoodDelivery</span>
+                    </a>
+                </div>
+
+                <!-- Back Button -->
+                <div class="flex items-center">
+                    <button onclick="goBack()" class="flex items-center text-gray-600 hover:text-primary mr-4">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Restaurants
+                    </button>
+                </div>
+
+                <!-- User Actions -->
+                <div class="flex items-center space-x-4">
+                    <!-- Cart Button -->
+                    <button id="cartBtn" class="relative p-2 text-gray-600 hover:text-primary">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span id="cartCount" class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                    </button>
+
+                    <!-- User Menu -->
+                    <div id="userMenu" class="relative">
+                        <button id="userMenuBtn" class="flex items-center text-gray-600 hover:text-primary">
+                            <i class="fas fa-user-circle text-xl mr-1"></i>
+                            <span id="userNameDisplay">Account</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Restaurant Header -->
+        <div id="restaurantHeader" class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <h1 id="restaurantName" class="text-3xl font-bold text-gray-900 mb-2">Loading...</h1>
+                    <p id="restaurantDescription" class="text-gray-600 mb-4"></p>
+                    <div class="flex items-center space-x-6 text-sm text-gray-500">
+                        <span id="restaurantCuisine" class="flex items-center">
+                            <i class="fas fa-utensils mr-1"></i>
+                            -
+                        </span>
+                        <span id="restaurantRating" class="flex items-center">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            -
+                        </span>
+                        <span id="restaurantDeliveryTime" class="flex items-center">
+                            <i class="fas fa-clock mr-1"></i>
+                            - mins
+                        </span>
+                        <span id="restaurantDeliveryFee" class="flex items-center">
+                            <i class="fas fa-truck mr-1"></i>
+                            Delivery: ₹-
+                        </span>
+                    </div>
+                </div>
+                <div id="restaurantImage" class="w-32 h-32 rounded-lg overflow-hidden ml-6">
+                    <img src="" alt="Restaurant" class="w-full h-full object-cover">
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Section -->
+        <div class="bg-white rounded-lg shadow-md">
+            <div class="p-6 border-b">
+                <h2 class="text-2xl font-bold text-gray-900">Menu</h2>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="loadingSpinner" class="flex justify-center items-center py-12">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <span class="ml-3 text-gray-600">Loading menu...</span>
+            </div>
+
+            <!-- Menu Items -->
+            <div id="menuItems" class="hidden">
+                <!-- Menu items will be populated here -->
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="hidden p-8 text-center">
+                <i class="fas fa-exclamation-triangle text-4xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Menu Temporarily Unavailable</h3>
+                <p class="text-gray-600 mb-4">We're having trouble loading the menu right now. Please try again later.</p>
+                <button onclick="loadMenu()" class="bg-primary text-white px-4 py-2 rounded hover:bg-orange-600">
+                    Try Again
+                </button>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden p-8 text-center">
+                <i class="fas fa-utensils text-4xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Menu Items Available</h3>
+                <p class="text-gray-600">This restaurant hasn't added any menu items yet.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Cart Sidebar -->
+    <div id="cartOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+    <div id="cartSidebar" class="fixed right-0 top-0 h-full w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-50">
+        <div class="flex flex-col h-full">
+            <!-- Cart Header -->
+            <div class="flex items-center justify-between p-4 border-b">
+                <h2 class="text-lg font-semibold">Your Cart</h2>
+                <button id="closeCart" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Cart Items -->
+            <div class="flex-1 overflow-y-auto p-4">
+                <div id="cartItems">
+                    <!-- Cart items will be populated here -->
+                </div>
+            </div>
+            
+            <!-- Cart Footer -->
+            <div class="border-t p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-lg font-semibold">Total:</span>
+                    <span id="cartTotal" class="text-lg font-bold text-primary">₹0</span>
+                </div>
+                <button id="checkoutBtn" class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed">
+                    Proceed to Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/menu.js"></script>
+</body>
+</html>

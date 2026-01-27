@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Registration Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; }
+        input, select { width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        .result { margin-top: 15px; padding: 10px; border-radius: 4px; white-space: pre-wrap; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Simple Registration Test</h1>
+    
+    <form id="testForm">
+        <div class="form-group">
+            <label>Name:</label>
+            <input type="text" id="name" value="Test User" required>
+        </div>
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="email" value="" required>
+        </div>
+        <div class="form-group">
+            <label>Phone (10 digits, starting with 6-9):</label>
+            <input type="tel" id="phone" value="9876543210" required>
+        </div>
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="password" value="password123" required>
+        </div>
+        <div class="form-group">
+            <label>Role:</label>
+            <select id="role" required>
+                <option value="CUSTOMER">Customer</option>
+                <option value="RESTAURANT_ADMIN">Restaurant Admin</option>
+                <option value="DELIVERY_PARTNER">Delivery Partner</option>
+            </select>
+        </div>
+        <button type="button" onclick="generateRandomData()">Generate Random Data</button>
+        <button type="submit">Register</button>
+    </form>
+    
+    <div id="result"></div>
+
+    <script>
+        // Generate random email on load
+        document.getElementById('email').value = 'testuser' + Math.floor(Math.random() * 10000) + '@example.com';
+
+        function generateRandomData() {
+            const randomNum = Math.floor(Math.random() * 10000);
+            document.getElementById('name').value = 'Test User ' + randomNum;
+            document.getElementById('email').value = 'testuser' + randomNum + '@example.com';
+            
+            // Generate valid phone number starting with 6-9
+            const firstDigit = Math.floor(Math.random() * 4) + 6; // 6, 7, 8, or 9
+            const remainingDigits = String(Math.floor(Math.random() * 1000000000)).padStart(9, '0');
+            document.getElementById('phone').value = firstDigit + remainingDigits;
+        }
+
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Registering...';
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                password: document.getElementById('password').value,
+                role: document.getElementById('role').value
+            };
+            
+            console.log('Registration data:', formData);
+            
+            try {
+                const response = await fetch('http://localhost:8080/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+                
+                const responseText = await response.text();
+                console.log('Response text:', responseText);
+                
+                if (response.ok) {
+                    const data = JSON.parse(responseText);
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ Registration Successful!\nUser: ${data.user.email}\nRole: ${data.user.role}\nAccess Token: ${data.access_token ? 'Received' : 'Missing'}\nRefresh Token: ${data.refresh_token ? 'Received' : 'Missing'}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ Registration Failed!\nStatus: ${response.status}\nResponse: ${responseText}`;
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Network Error!\n${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

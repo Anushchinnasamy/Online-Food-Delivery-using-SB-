@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 15px; padding: 10px; border-radius: 4px; white-space: pre-wrap; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .debug { background: #f8f9fa; color: #495057; border: 1px solid #dee2e6; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Authentication Debug Tool</h1>
+    
+    <!-- API Test Section -->
+    <div class="section">
+        <h2>1. API Connectivity Test</h2>
+        <button onclick="testConnectivity()">Test API Connectivity</button>
+        <div id="connectivityResult" class="result"></div>
+    </div>
+
+    <!-- Registration Test -->
+    <div class="section">
+        <h2>2. Registration Test</h2>
+        <div class="form-group">
+            <label>Name:</label>
+            <input type="text" id="regName" value="Test User">
+        </div>
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="regEmail" value="">
+        </div>
+        <div class="form-group">
+            <label>Phone:</label>
+            <input type="tel" id="regPhone" value="9876543210">
+        </div>
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="regPassword" value="password123">
+        </div>
+        <div class="form-group">
+            <label>Role:</label>
+            <select id="regRole">
+                <option value="CUSTOMER">Customer</option>
+                <option value="RESTAURANT_ADMIN">Restaurant Admin</option>
+                <option value="DELIVERY_PARTNER">Delivery Partner</option>
+            </select>
+        </div>
+        <button onclick="generateRandomRegData()">Generate Random Data</button>
+        <button onclick="testRegistration()">Test Registration</button>
+        <div id="registrationResult" class="result"></div>
+    </div>
+
+    <!-- Login Test -->
+    <div class="section">
+        <h2>3. Login Test</h2>
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="loginEmail" value="john.demo@fooddelivery.com">
+        </div>
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="loginPassword" value="password123">
+        </div>
+        <button onclick="testLogin()">Test Login</button>
+        <button onclick="testDemoLogin()">Test Demo Login</button>
+        <div id="loginResult" class="result"></div>
+    </div>
+
+    <!-- CORS Test -->
+    <div class="section">
+        <h2>4. CORS Test</h2>
+        <button onclick="testCORS()">Test CORS</button>
+        <div id="corsResult" class="result"></div>
+    </div>
+
+    <!-- Network Debug -->
+    <div class="section">
+        <h2>5. Network Debug</h2>
+        <button onclick="showNetworkInfo()">Show Network Info</button>
+        <div id="networkResult" class="result"></div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script>
+        // Generate random email on load
+        document.getElementById('regEmail').value = 'testuser' + Math.floor(Math.random() * 10000) + '@example.com';
+
+        function log(message, type = 'info') {
+            console.log(message);
+            return `[${new Date().toLocaleTimeString()}] ${message}`;
+        }
+
+        function generateRandomRegData() {
+            const randomNum = Math.floor(Math.random() * 10000);
+            document.getElementById('regName').value = 'Test User ' + randomNum;
+            document.getElementById('regEmail').value = 'testuser' + randomNum + '@example.com';
+            
+            // Generate valid phone number
+            const phoneNum = '9' + String(Math.floor(Math.random() * 1000000000)).padStart(9, '0');
+            document.getElementById('regPhone').value = phoneNum;
+        }
+
+        async function testConnectivity() {
+            const resultDiv = document.getElementById('connectivityResult');
+            resultDiv.innerHTML = '<div class="info">Testing connectivity...</div>';
+            
+            let results = [];
+            
+            // Test API Gateway
+            try {
+                const response = await fetch('http://localhost:8080/actuator/health');
+                results.push(log(`✅ API Gateway: ${response.status} ${response.statusText}`));
+            } catch (error) {
+                results.push(log(`❌ API Gateway: ${error.message}`, 'error'));
+            }
+            
+            // Test Auth Service directly
+            try {
+                const response = await fetch('http://localhost:8081/actuator/health');
+                results.push(log(`✅ Auth Service: ${response.status} ${response.statusText}`));
+            } catch (error) {
+                results.push(log(`❌ Auth Service: ${error.message}`, 'error'));
+            }
+            
+            // Test CORS preflight
+            try {
+                const response = await fetch('http://localhost:8080/auth/login', {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': 'http://localhost:3000',
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                results.push(log(`✅ CORS Preflight: ${response.status} ${response.statusText}`));
+            } catch (error) {
+                results.push(log(`❌ CORS Preflight: ${error.message}`, 'error'));
+            }
+            
+            resultDiv.innerHTML = `<div class="debug">${results.join('\n')}</div>`;
+        }
+
+        async function testRegistration() {
+            const resultDiv = document.getElementById('registrationResult');
+            resultDiv.innerHTML = '<div class="info">Testing registration...</div>';
+            
+            const formData = {
+                name: document.getElementById('regName').value,
+                email: document.getElementById('regEmail').value,
+                phone: document.getElementById('regPhone').value,
+                password: document.getElementById('regPassword').value,
+                role: document.getElementById('regRole').value
+            };
+            
+            let debugInfo = [];
+            debugInfo.push(log('Registration Data:'));
+            debugInfo.push(log(JSON.stringify(formData, null, 2)));
+            
+            try {
+                debugInfo.push(log('Making request to: ' + API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.REGISTER));
+                
+                const response = await fetch(API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.REGISTER, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': 'http://localhost:3000'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                debugInfo.push(log(`Response Status: ${response.status} ${response.statusText}`));
+                debugInfo.push(log('Response Headers:'));
+                for (let [key, value] of response.headers.entries()) {
+                    debugInfo.push(log(`  ${key}: ${value}`));
+                }
+                
+                const responseText = await response.text();
+                debugInfo.push(log('Response Body:'));
+                debugInfo.push(log(responseText));
+                
+                if (response.ok) {
+                    const data = JSON.parse(responseText);
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Registration Successful!</h3>
+                            <p><strong>User:</strong> ${data.user.email}</p>
+                            <p><strong>Role:</strong> ${data.user.role}</p>
+                            <p><strong>Token:</strong> ${data.access_token ? 'Received' : 'Missing'}</p>
+                        </div>
+                        <div class="debug">${debugInfo.join('\n')}</div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h3>❌ Registration Failed</h3>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                            <p><strong>Response:</strong> ${responseText}</p>
+                        </div>
+                        <div class="debug">${debugInfo.join('\n')}</div>
+                    `;
+                }
+            } catch (error) {
+                debugInfo.push(log(`❌ Network Error: ${error.message}`, 'error'));
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Network Error</h3>
+                        <p>${error.message}</p>
+                    </div>
+                    <div class="debug">${debugInfo.join('\n')}</div>
+                `;
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.innerHTML = '<div class="info">Testing login...</div>';
+            
+            const formData = {
+                email: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            };
+            
+            let debugInfo = [];
+            debugInfo.push(log('Login Data:'));
+            debugInfo.push(log(JSON.stringify(formData, null, 2)));
+            
+            try {
+                debugInfo.push(log('Making request to: ' + API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.LOGIN));
+                
+                const response = await fetch(API_CONFIG.BASE_URL + API_CONFIG.ENDPOINTS.LOGIN, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': 'http://localhost:3000'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                debugInfo.push(log(`Response Status: ${response.status} ${response.statusText}`));
+                
+                const responseText = await response.text();
+                debugInfo.push(log('Response Body:'));
+                debugInfo.push(log(responseText));
+                
+                if (response.ok) {
+                    const data = JSON.parse(responseText);
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Login Successful!</h3>
+                            <p><strong>User:</strong> ${data.user.email}</p>
+                            <p><strong>Role:</strong> ${data.user.role}</p>
+                            <p><strong>Token:</strong> ${data.access_token ? 'Received' : 'Missing'}</p>
+                        </div>
+                        <div class="debug">${debugInfo.join('\n')}</div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h3>❌ Login Failed</h3>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                            <p><strong>Response:</strong> ${responseText}</p>
+                        </div>
+                        <div class="debug">${debugInfo.join('\n')}</div>
+                    `;
+                }
+            } catch (error) {
+                debugInfo.push(log(`❌ Network Error: ${error.message}`, 'error'));
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Network Error</h3>
+                        <p>${error.message}</p>
+                    </div>
+                    <div class="debug">${debugInfo.join('\n')}</div>
+                `;
+            }
+        }
+
+        async function testDemoLogin() {
+            document.getElementById('loginEmail').value = 'john.demo@fooddelivery.com';
+            document.getElementById('loginPassword').value = 'password123';
+            await testLogin();
+        }
+
+        async function testCORS() {
+            const resultDiv = document.getElementById('corsResult');
+            resultDiv.innerHTML = '<div class="info">Testing CORS...</div>';
+            
+            let debugInfo = [];
+            
+            try {
+                // Test simple GET request
+                const getResponse = await fetch('http://localhost:8080/actuator/health', {
+                    method: 'GET',
+                    headers: {
+                        'Origin': 'http://localhost:3000'
+                    }
+                });
+                debugInfo.push(log(`✅ GET Request: ${getResponse.status}`));
+                
+                // Test POST request with CORS
+                const postResponse = await fetch('http://localhost:8080/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': 'http://localhost:3000'
+                    },
+                    body: JSON.stringify({email: 'test@test.com', password: 'test'})
+                });
+                debugInfo.push(log(`✅ POST Request: ${postResponse.status}`));
+                
+                resultDiv.innerHTML = `<div class="success">CORS is working</div><div class="debug">${debugInfo.join('\n')}</div>`;
+            } catch (error) {
+                debugInfo.push(log(`❌ CORS Error: ${error.message}`, 'error'));
+                resultDiv.innerHTML = `<div class="error">CORS Error: ${error.message}</div><div class="debug">${debugInfo.join('\n')}</div>`;
+            }
+        }
+
+        function showNetworkInfo() {
+            const resultDiv = document.getElementById('networkResult');
+            
+            let info = [];
+            info.push(log('Current URL: ' + window.location.href));
+            info.push(log('User Agent: ' + navigator.userAgent));
+            info.push(log('Online: ' + navigator.onLine));
+            info.push(log('API Base URL: ' + API_CONFIG.BASE_URL));
+            info.push(log('Login Endpoint: ' + API_CONFIG.ENDPOINTS.LOGIN));
+            info.push(log('Register Endpoint: ' + API_CONFIG.ENDPOINTS.REGISTER));
+            
+            resultDiv.innerHTML = `<div class="debug">${info.join('\n')}</div>`;
+        }
+    </script>
+</body>
+</html>

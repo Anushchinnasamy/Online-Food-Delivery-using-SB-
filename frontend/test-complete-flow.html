@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Flow Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ff6b35',
+                        secondary: '#2d3748',
+                        accent: '#38b2ac'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-primary">🍕 FoodDelivery Test</h1>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- User Menu -->
+                    <div id="userMenu" class="hidden">
+                        <div class="relative">
+                            <button id="userMenuBtn" class="flex items-center text-gray-700 hover:text-primary">
+                                <i class="fas fa-user-circle text-xl mr-2"></i>
+                                <span id="userName">User</span>
+                                <i class="fas fa-chevron-down ml-1"></i>
+                            </button>
+                            <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                <button id="logoutBtn" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Auth Buttons -->
+                    <div id="authButtons">
+                        <button id="loginBtn" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Login</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Status Section -->
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <h2 class="text-lg font-semibold mb-4">Authentication Status</h2>
+            <div id="authStatus" class="mb-4 p-4 bg-gray-100 rounded"></div>
+            <div class="space-x-2">
+                <button id="manualLoginBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Manual Login</button>
+                <button id="testApiBtn" class="bg-green-500 text-white px-4 py-2 rounded">Test API</button>
+                <button id="refreshRestaurantsBtn" class="bg-purple-500 text-white px-4 py-2 rounded">Refresh Restaurants</button>
+            </div>
+        </div>
+
+        <!-- Restaurants Section -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">Restaurants</h2>
+            
+            <!-- Filters -->
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <button class="filter-btn active bg-primary text-white px-4 py-2 rounded-full" data-filter="all">All</button>
+                <button class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full border hover:bg-gray-50" data-filter="Indian">Indian</button>
+                <button class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full border hover:bg-gray-50" data-filter="Italian">Italian</button>
+                <button class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full border hover:bg-gray-50" data-filter="Fast Food">Fast Food</button>
+            </div>
+
+            <!-- Restaurants Grid -->
+            <div id="restaurantsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Restaurants will be loaded here -->
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="hidden text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p class="mt-2 text-gray-600">Loading restaurants...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/restaurants.js"></script>
+    <script>
+        function updateAuthStatus() {
+            const authStatusDiv = document.getElementById('authStatus');
+            const isAuth = authManager.isAuthenticated();
+            const user = authManager.getCurrentUser();
+            const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+            
+            authStatusDiv.innerHTML = `
+                <p><strong>Authenticated:</strong> ${isAuth ? 'Yes' : 'No'}</p>
+                <p><strong>User:</strong> ${user ? user.email + ' (' + user.role + ')' : 'None'}</p>
+                <p><strong>Token:</strong> ${token ? 'Present' : 'Missing'}</p>
+                <p><strong>Restaurants loaded:</strong> ${restaurantManager.restaurants.length}</p>
+            `;
+        }
+        
+        // Manual login button
+        document.getElementById('manualLoginBtn').addEventListener('click', async () => {
+            try {
+                console.log('Attempting login...');
+                await authManager.login('john.demo@fooddelivery.com', 'password123');
+                console.log('Login successful');
+                updateAuthStatus();
+            } catch (error) {
+                console.error('Login failed:', error);
+                alert('Login failed: ' + error.message);
+            }
+        });
+        
+        // Test API button
+        document.getElementById('testApiBtn').addEventListener('click', async () => {
+            try {
+                console.log('Testing API...');
+                const response = await authManager.apiRequest('/restaurants');
+                const data = await response.json();
+                console.log('API test successful:', data);
+                alert(`API test successful! Found ${data.content ? data.content.length : data.length} restaurants`);
+            } catch (error) {
+                console.error('API test failed:', error);
+                alert('API test failed: ' + error.message);
+            }
+        });
+        
+        // Refresh restaurants button
+        document.getElementById('refreshRestaurantsBtn').addEventListener('click', async () => {
+            try {
+                console.log('Refreshing restaurants...');
+                await restaurantManager.loadRestaurants();
+                console.log('Restaurants refreshed');
+                updateAuthStatus();
+            } catch (error) {
+                console.error('Refresh failed:', error);
+                alert('Refresh failed: ' + error.message);
+            }
+        });
+        
+        // Listen for auth events
+        document.addEventListener('userLoggedIn', (e) => {
+            console.log('User logged in event received:', e.detail);
+            updateAuthStatus();
+        });
+        
+        document.addEventListener('userLoggedOut', () => {
+            console.log('User logged out event received');
+            updateAuthStatus();
+        });
+        
+        // Initialize
+        console.log('Initializing test page...');
+        updateAuthStatus();
+        
+        // Auto-login for testing
+        setTimeout(async () => {
+            if (!authManager.isAuthenticated()) {
+                console.log('Auto-logging in for testing...');
+                try {
+                    await authManager.login('john.demo@fooddelivery.com', 'password123');
+                    console.log('Auto-login successful');
+                } catch (error) {
+                    console.error('Auto-login failed:', error);
+                }
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
