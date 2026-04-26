@@ -1,0 +1,133 @@
+===========================================
+DEPLOYMENT COMMANDS - COPY & PASTE
+===========================================
+
+STEP 1: PUSH TO GITHUB (If not already)
+-------------------------------------------
+cd "Online Food Delivery"
+git init
+git add .
+git commit -m "Ready for deployment"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+git push -u origin main
+
+
+STEP 2: DEPLOY BACKEND TO RAILWAY
+-------------------------------------------
+Option A: Web Interface (Recommended)
+1. Go to: https://railway.app
+2. Sign up with GitHub
+3. Click "New Project" → "Deploy from GitHub repo"
+4. Select your repository
+5. Add PostgreSQL: Click "New" → "PostgreSQL"
+6. Add environment variables:
+   SPRING_PROFILES_ACTIVE=prod
+   JWT_SECRET=MySecretKey12345678901234567890123456
+7. Copy your backend URL (e.g., https://your-app.railway.app)
+
+Option B: CLI
+npm install -g @railway/cli
+cd backend
+railway login
+railway init
+railway up
+
+
+STEP 3: DEPLOY FRONTEND TO VERCEL
+-------------------------------------------
+Option A: Web Interface (Recommended)
+1. Go to: https://vercel.com
+2. Sign up with GitHub
+3. Click "New Project"
+4. Import your repository
+5. Configure:
+   - Framework: Vite
+   - Root Directory: frontend
+   - Build Command: npm run build
+   - Output Directory: dist
+6. Add environment variable:
+   VITE_API_BASE_URL=https://your-backend-url.railway.app
+7. Click "Deploy"
+8. Copy your frontend URL (e.g., https://your-app.vercel.app)
+
+Option B: CLI
+npm install -g vercel
+cd frontend
+vercel login
+vercel --prod
+
+
+STEP 4: UPDATE CORS
+-------------------------------------------
+1. Go to Railway dashboard
+2. Click your backend project
+3. Add environment variable:
+   CORS_ORIGINS=https://your-frontend-url.vercel.app
+4. Save (auto-redeploys)
+
+
+STEP 5: TEST YOUR APP
+-------------------------------------------
+1. Visit: https://your-frontend-url.vercel.app
+2. Register a new account
+3. Browse restaurants
+4. Add items to cart
+5. Place an order
+6. ✅ Success!
+
+
+IMPORTANT URLS
+-------------------------------------------
+Railway: https://railway.app
+Vercel: https://vercel.com
+Render (Alternative): https://render.com
+
+
+ENVIRONMENT VARIABLES SUMMARY
+-------------------------------------------
+Backend (Railway):
+  SPRING_PROFILES_ACTIVE=prod
+  JWT_SECRET=<your-secret-key-min-32-chars>
+  CORS_ORIGINS=https://your-frontend.vercel.app
+
+Frontend (Vercel):
+  VITE_API_BASE_URL=https://your-backend.railway.app
+
+
+TROUBLESHOOTING
+-------------------------------------------
+Issue: API calls fail
+Fix: Update VITE_API_BASE_URL in Vercel
+
+Issue: CORS error
+Fix: Add frontend URL to CORS_ORIGINS in Railway
+
+Issue: Build fails
+Fix: Check logs in dashboard
+
+
+COST
+-------------------------------------------
+Vercel: FREE forever
+Railway: $5 free credit/month
+Total: FREE for first month
+
+
+SUPPORT
+-------------------------------------------
+Vercel Docs: https://vercel.com/docs
+Railway Docs: https://docs.railway.app
+
+
+===========================================
+DEPLOYMENT TIME: 10 MINUTES
+DIFFICULTY: EASY ⭐
+COST: FREE
+===========================================
+
+Your app will be live at:
+Frontend: https://your-app.vercel.app
+Backend: https://your-app.railway.app
+
+CONGRATULATIONS! 🎉🚀

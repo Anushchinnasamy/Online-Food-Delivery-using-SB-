@@ -1,0 +1,11 @@
+{
+  "restaurantId": 1,
+  "items": [
+    {
+      "menuItemId": 1,
+      "quantity": 1,
+      "specialInstructions": "Test order"
+    }
+  ],
+  "specialInstructions": "Test order from API"
+}
