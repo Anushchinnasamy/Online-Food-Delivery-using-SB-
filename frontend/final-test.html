@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Authentication Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ff6b35',
+                        secondary: '#2d3748',
+                        accent: '#38b2ac'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-4xl mx-auto p-8">
+        <h1 class="text-3xl font-bold mb-8 text-center">🍕 Restaurant Authentication Test</h1>
+        
+        <!-- Status Panel -->
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <h2 class="text-xl font-semibold mb-4">Current Status</h2>
+            <div id="status" class="space-y-2"></div>
+            <div class="mt-4 space-x-2">
+                <button id="loginBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Login as Customer
+                </button>
+                <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    Logout
+                </button>
+                <button id="refreshBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Refresh Status
+                </button>
+            </div>
+        </div>
+
+        <!-- Restaurants Panel -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4">Restaurants</h2>
+            
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="hidden text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p class="mt-2 text-gray-600">Loading restaurants...</p>
+            </div>
+
+            <!-- Restaurants Grid -->
+            <div id="restaurantsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Restaurants will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/restaurants.js"></script>
+    <script>
+        function updateStatus() {
+            const statusDiv = document.getElementById('status');
+            const isAuth = authManager.isAuthenticated();
+            const user = authManager.getCurrentUser();
+            const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+            const restaurantCount = restaurantManager.restaurants.length;
+            
+            statusDiv.innerHTML = `
+                <p><strong>🔐 Authenticated:</strong> <span class="${isAuth ? 'text-green-600' : 'text-red-600'}">${isAuth ? 'Yes' : 'No'}</span></p>
+                <p><strong>👤 User:</strong> ${user ? `${user.email} (${user.role})` : 'None'}</p>
+                <p><strong>🎫 Token:</strong> <span class="${token ? 'text-green-600' : 'text-red-600'}">${token ? 'Present' : 'Missing'}</span></p>
+                <p><strong>🏪 Restaurants:</strong> <span class="${restaurantCount > 0 ? 'text-green-600' : 'text-gray-600'}">${restaurantCount} loaded</span></p>
+            `;
+        }
+        
+        // Event listeners
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            try {
+                console.log('🔄 Attempting login...');
+                await authManager.login('john.demo@fooddelivery.com', 'password123');
+                console.log('✅ Login successful');
+                updateStatus();
+            } catch (error) {
+                console.error('❌ Login failed:', error);
+                alert('Login failed: ' + error.message);
+            }
+        });
+        
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            console.log('🔄 Logging out...');
+            authManager.logout();
+            console.log('✅ Logout successful');
+            updateStatus();
+        });
+        
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            console.log('🔄 Refreshing status...');
+            updateStatus();
+        });
+        
+        // Listen for auth events
+        document.addEventListener('userLoggedIn', (e) => {
+            console.log('🎉 User logged in event received:', e.detail.email);
+            updateStatus();
+        });
+        
+        document.addEventListener('userLoggedOut', () => {
+            console.log('👋 User logged out event received');
+            updateStatus();
+        });
+        
+        // Initialize
+        console.log('🚀 Initializing test page...');
+        updateStatus();
+        
+        // Monitor restaurant manager changes
+        const originalLoadRestaurants = restaurantManager.loadRestaurants;
+        restaurantManager.loadRestaurants = async function() {
+            console.log('🏪 Loading restaurants...');
+            try {
+                await originalLoadRestaurants.call(this);
+                console.log(`✅ Restaurants loaded: ${this.restaurants.length} found`);
+                updateStatus();
+            } catch (error) {
+                console.error('❌ Failed to load restaurants:', error);
+                updateStatus();
+            }
+        };
+        
+        // Auto-test after 2 seconds
+        setTimeout(async () => {
+            if (!authManager.isAuthenticated()) {
+                console.log('🤖 Auto-testing login flow...');
+                document.getElementById('loginBtn').click();
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

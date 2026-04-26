@@ -1,0 +1,114 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: menu-service
+  
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://localhost:5433/menu_service_db
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+    defer-datasource-initialization: true
+    
+  # SQL Initialization
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data.sql
+
+# Eureka Configuration (Disabled for testing)
+eureka:
+  client:
+    enabled: false
+
+# Feign Configuration
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+        loggerLevel: basic
+  hystrix:
+    enabled: true
+
+# Hystrix Configuration
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000
+
+# Management Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Logging Configuration
+logging:
+  level:
+    com.fooddelivery.menu: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: INFO
+    org.springframework.cloud: INFO
+    feign: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/menu-service.log
+
+# Custom Application Properties
+app:
+  menu:
+    default-page-size: 20
+    max-page-size: 100
+    max-items-per-restaurant: 1000
+    categories:
+      - "Appetizers"
+      - "Main Course"
+      - "Desserts"
+      - "Beverages"
+      - "Snacks"
+      - "Salads"
+      - "Soups"
+      - "Breads"
+      - "Rice & Biryani"
+      - "Chinese"
+      - "South Indian"
+      - "North Indian"
+      - "Continental"
+      - "Fast Food"

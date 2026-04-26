@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { padding: 10px 15px; margin: 5px; }
+        .result { margin-top: 10px; padding: 10px; background: #f5f5f5; white-space: pre-wrap; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <h1>Authentication Test</h1>
+    
+    <div class="test-section">
+        <h3>Test Registration</h3>
+        <button onclick="testRegister()">Register New User</button>
+        <div id="register-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test Login</h3>
+        <button onclick="testLogin()">Login with New User</button>
+        <div id="login-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test Protected Endpoint</h3>
+        <button onclick="testProtected()">Test Restaurants (with JWT)</button>
+        <div id="protected-result" class="result"></div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        let testUser = null;
+        let testToken = null;
+
+        async function testRegister() {
+            const resultDiv = document.getElementById('register-result');
+            try {
+                const randomNum = Math.floor(Math.random() * 10000);
+                const userData = {
+                    name: `Test User ${randomNum}`,
+                    email: `testuser${randomNum}@example.com`,
+                    phone: `9${String(Math.floor(Math.random() * 1000000000)).padStart(9, '0')}`,
+                    password: 'password123',
+                    role: 'CUSTOMER'
+                };
+
+                console.log('Registering user:', userData);
+                
+                const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REGISTER}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                const data = await response.json();
+                console.log('Registration response:', data);
+
+                if (response.ok) {
+                    testUser = userData;
+                    testToken = data.access_token;
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `Registration Success!\nUser: ${data.user.email}\nToken: ${data.access_token.substring(0, 50)}...`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `Registration Error: ${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Registration Error: ${error.message}`;
+                console.error('Registration error:', error);
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('login-result');
+            if (!testUser) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Please register a user first';
+                return;
+            }
+
+            try {
+                console.log('Logging in user:', testUser.email);
+                
+                const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.LOGIN}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: testUser.email,
+                        password: testUser.password
+                    })
+                });
+
+                const data = await response.json();
+                console.log('Login response:', data);
+
+                if (response.ok) {
+                    testToken = data.access_token;
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `Login Success!\nUser: ${data.user.email}\nToken: ${data.access_token.substring(0, 50)}...`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `Login Error: ${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Login Error: ${error.message}`;
+                console.error('Login error:', error);
+            }
+        }
+
+        async function testProtected() {
+            const resultDiv = document.getElementById('protected-result');
+            if (!testToken) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Please login first to get a token';
+                return;
+            }
+
+            try {
+                console.log('Testing protected endpoint with token:', testToken.substring(0, 50));
+                
+                const response = await fetch(`${API_CONFIG.BASE_URL}/restaurants`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${testToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                console.log('Protected endpoint response:', data);
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `Protected Endpoint Success!\nFound ${data.content.length} restaurants`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `Protected Endpoint Error: ${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Protected Endpoint Error: ${error.message}`;
+                console.error('Protected endpoint error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

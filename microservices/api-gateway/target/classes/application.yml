@@ -1,0 +1,138 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  
+  # Disable Redis auto-configuration
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+  
+  # Cloud Gateway Configuration
+  cloud:
+    gateway:
+      routes:
+        # Auth Service Routes (Public - No JWT validation)
+        - id: auth-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/auth/**
+        
+        # Restaurant Service Routes (Public - No JWT validation)
+        - id: restaurant-service-public
+          uri: http://localhost:8082
+          predicates:
+            - Path=/restaurants/**
+        
+        # Menu Service Routes (Public - No JWT validation)
+        - id: menu-service-public
+          uri: http://localhost:8083
+          predicates:
+            - Path=/menus/**
+        
+        # Order Service Routes (Protected - JWT required)
+        - id: order-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/orders/**
+          filters:
+            - JwtAuthenticationFilter
+        
+        # Payment Service Routes (Protected - JWT required)
+        - id: payment-service
+          uri: http://localhost:8085
+          predicates:
+            - Path=/payments/**, /refunds/**
+          filters:
+            - JwtAuthenticationFilter
+        
+        # Delivery Service Routes (Protected - JWT required)
+        - id: delivery-service
+          uri: http://localhost:8086
+          predicates:
+            - Path=/deliveries/**, /delivery-partners/**
+          filters:
+            - JwtAuthenticationFilter
+        
+        # Notification Service Routes (Protected - JWT required)
+        - id: notification-service
+          uri: http://localhost:8087
+          predicates:
+            - Path=/notifications/**
+          filters:
+            - JwtAuthenticationFilter
+      
+      # Global CORS Configuration
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins:
+              - "http://localhost:3000"
+              - "http://localhost:8080"
+              - "http://127.0.0.1:3000"
+              - "http://127.0.0.1:8080"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowed-headers:
+              - "*"
+            allow-credentials: true
+            exposed-headers:
+              - "Authorization"
+              - "X-User-Id"
+              - "X-User-Role"
+              - "X-User-Email"
+      
+      # Default Filters
+      default-filters:
+        - name: Retry
+          args:
+            retries: 3
+            methods: GET,POST,PUT,DELETE
+            backoff:
+              firstBackoff: 50ms
+              maxBackoff: 500ms
+        # Removed RequestRateLimiter to avoid Redis dependency
+
+  # Redis Configuration (Disabled - not needed for basic functionality)
+  # redis:
+  #   host: localhost
+  #   port: 6379
+  #   timeout: 2000ms
+  #   lettuce:
+  #     pool:
+  #       max-active: 8
+  #       max-idle: 8
+  #       min-idle: 0
+
+# JWT Configuration (must match auth-service)
+jwt:
+  secret: mySecretKey123456789012345678901234567890123456789012345678901234567890
+
+# Management Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,gateway
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true
+
+# Logging Configuration
+logging:
+  level:
+    com.fooddelivery.gateway: DEBUG
+    org.springframework.cloud.gateway: INFO
+    org.springframework.web.reactive: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

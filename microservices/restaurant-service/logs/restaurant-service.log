@@ -1,0 +1,24 @@
+2026-01-28 00:07:58 [http-nio-8082-exec-8] DEBUG c.f.r.c.RestaurantController - Fetching restaurant with ID: 1
+2026-01-28 00:07:58 [http-nio-8082-exec-8] DEBUG c.f.r.service.RestaurantService - Fetching restaurant with ID: 1
+2026-01-28 00:08:02 [http-nio-8082-exec-10] DEBUG c.f.r.c.RestaurantController - Fetching restaurant with ID: 1
+2026-01-28 00:08:02 [http-nio-8082-exec-10] DEBUG c.f.r.service.RestaurantService - Fetching restaurant with ID: 1
+2026-01-28 00:10:46 [http-nio-8082-exec-2] DEBUG c.f.r.c.RestaurantController - Fetching restaurant with ID: 2
+2026-01-28 00:10:46 [http-nio-8082-exec-2] DEBUG c.f.r.service.RestaurantService - Fetching restaurant with ID: 2
+2026-01-28 00:11:22 [http-nio-8082-exec-3] DEBUG c.f.r.c.RestaurantController - Fetching all restaurants for customers
+2026-01-28 00:11:22 [http-nio-8082-exec-3] DEBUG c.f.r.service.RestaurantService - Fetching all visible restaurants
+2026-01-28 00:11:55 [http-nio-8082-exec-4] DEBUG c.f.r.c.RestaurantController - Fetching all restaurants for customers
+2026-01-28 00:11:55 [http-nio-8082-exec-4] DEBUG c.f.r.service.RestaurantService - Fetching all visible restaurants
+2026-01-28 00:12:02 [http-nio-8082-exec-5] DEBUG c.f.r.c.RestaurantController - Fetching restaurant with ID: 1
+2026-01-28 00:12:02 [http-nio-8082-exec-5] DEBUG c.f.r.service.RestaurantService - Fetching restaurant with ID: 1
+2026-01-28 00:24:14 [http-nio-8082-exec-7] DEBUG c.f.r.c.RestaurantController - Fetching restaurant with ID: 1
+2026-01-28 00:24:14 [http-nio-8082-exec-7] DEBUG c.f.r.service.RestaurantService - Fetching restaurant with ID: 1
+2026-01-28 00:24:35 [http-nio-8082-exec-9] DEBUG c.f.r.c.RestaurantController - Fetching all restaurants for customers
+2026-01-28 00:24:35 [http-nio-8082-exec-9] DEBUG c.f.r.service.RestaurantService - Fetching all visible restaurants
+2026-01-28 00:24:59 [http-nio-8082-exec-8] DEBUG c.f.r.c.RestaurantController - Searching restaurants with filters - city: null, cuisine: null, name: null
+2026-01-28 00:24:59 [http-nio-8082-exec-8] DEBUG c.f.r.service.RestaurantService - Searching restaurants by city: null and cuisine: null
+2026-01-28 00:25:23 [http-nio-8082-exec-10] DEBUG c.f.r.c.RestaurantController - Fetching restaurant with ID: 1
+2026-01-28 00:25:23 [http-nio-8082-exec-10] DEBUG c.f.r.service.RestaurantService - Fetching restaurant with ID: 1
+2026-01-28 00:25:23 [http-nio-8082-exec-1] DEBUG c.f.r.c.RestaurantController - Fetching restaurant with ID: 1
+2026-01-28 00:25:23 [http-nio-8082-exec-1] DEBUG c.f.r.service.RestaurantService - Fetching restaurant with ID: 1
+2026-01-28 00:25:28 [http-nio-8082-exec-2] DEBUG c.f.r.c.RestaurantController - Fetching restaurant with ID: 1
+2026-01-28 00:25:28 [http-nio-8082-exec-2] DEBUG c.f.r.service.RestaurantService - Fetching restaurant with ID: 1

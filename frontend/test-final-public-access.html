@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Public Access Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ff6b35',
+                        secondary: '#2d3748',
+                        accent: '#38b2ac'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-4xl mx-auto p-8">
+        <h1 class="text-3xl font-bold mb-8 text-center">🍕 Final Public Access Test</h1>
+        
+        <!-- Test Results -->
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <h2 class="text-xl font-semibold mb-4">Test Results</h2>
+            <div id="testResults" class="space-y-2"></div>
+            <button id="runTestsBtn" class="mt-4 bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
+                Run Tests
+            </button>
+        </div>
+
+        <!-- Restaurants Display -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4">Restaurants (Should Load Without Login)</h2>
+            <div id="restaurantsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Restaurants will be loaded here -->
+            </div>
+            <div id="loadingSpinner" class="hidden text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p class="mt-2 text-gray-600">Loading restaurants...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/restaurants.js"></script>
+    <script>
+        async function runTests() {
+            const resultsDiv = document.getElementById('testResults');
+            const tests = [];
+            
+            // Test 1: Public Restaurant Access
+            try {
+                const response = await fetch(`${API_CONFIG.BASE_URL}/restaurants`);
+                if (response.ok) {
+                    const data = await response.json();
+                    tests.push({
+                        name: '🏪 Public Restaurant Access',
+                        status: 'PASS',
+                        message: `Loaded ${data.content ? data.content.length : data.length} restaurants without authentication`
+                    });
+                } else {
+                    tests.push({
+                        name: '🏪 Public Restaurant Access',
+                        status: 'FAIL',
+                        message: `HTTP ${response.status}: ${response.statusText}`
+                    });
+                }
+            } catch (error) {
+                tests.push({
+                    name: '🏪 Public Restaurant Access',
+                    status: 'FAIL',
+                    message: `Error: ${error.message}`
+                });
+            }
+            
+            // Test 2: Public Menu Access
+            try {
+                const response = await fetch(`${API_CONFIG.BASE_URL}/menus`);
+                if (response.ok) {
+                    const data = await response.json();
+                    tests.push({
+                        name: '🍽️ Public Menu Access',
+                        status: 'PASS',
+                        message: `Loaded ${data.content ? data.content.length : data.length} menu items without authentication`
+                    });
+                } else {
+                    tests.push({
+                        name: '🍽️ Public Menu Access',
+                        status: 'FAIL',
+                        message: `HTTP ${response.status}: ${response.statusText}`
+                    });
+                }
+            } catch (error) {
+                tests.push({
+                    name: '🍽️ Public Menu Access',
+                    status: 'FAIL',
+                    message: `Error: ${error.message}`
+                });
+            }
+            
+            // Test 3: Cart Authentication Check
+            const mockMenuItem = {
+                id: 1,
+                name: 'Test Pizza',
+                description: 'Test item',
+                price: 299,
+                restaurantId: 1,
+                restaurantName: 'Test Restaurant'
+            };
+            
+            const cartResult = cartManager.addItem(mockMenuItem, 1);
+            if (!cartResult && !authManager.isAuthenticated()) {
+                tests.push({
+                    name: '🛒 Cart Authentication Required',
+                    status: 'PASS',
+                    message: 'Cart correctly requires authentication'
+                });
+            } else if (cartResult && authManager.isAuthenticated()) {
+                tests.push({
+                    name: '🛒 Cart Authentication Required',
+                    status: 'PASS',
+                    message: 'Cart works when authenticated'
+                });
+            } else {
+                tests.push({
+                    name: '🛒 Cart Authentication Required',
+                    status: 'FAIL',
+                    message: 'Cart authentication check failed'
+                });
+            }
+            
+            // Display results
+            resultsDiv.innerHTML = tests.map(test => `
+                <div class="flex items-center justify-between p-3 rounded ${
+                    test.status === 'PASS' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+                }">
+                    <div class="flex items-center">
+                        <span class="${test.status === 'PASS' ? 'text-green-600' : 'text-red-600'} mr-2">
+                            ${test.status === 'PASS' ? '✅' : '❌'}
+                        </span>
+                        <span class="font-medium">${test.name}</span>
+                    </div>
+                    <span class="text-sm ${test.status === 'PASS' ? 'text-green-600' : 'text-red-600'}">
+                        ${test.status}
+                    </span>
+                </div>
+                <div class="text-sm text-gray-600 ml-6 mb-2">${test.message}</div>
+            `).join('');
+        }
+        
+        document.getElementById('runTestsBtn').addEventListener('click', runTests);
+        
+        // Run tests automatically on page load
+        setTimeout(runTests, 1000);
+    </script>
+</body>
+</html>
